@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>EMI Calculator</title>
+
+    <!-- Compiled and minified CSS -->
+    <link rel="stylesheet" href="./css/bootstrap.min.css" />
+    <link rel="stylesheet" href="./css/apexcharts.css" />
+    <link rel="stylesheet" href="./css/bootstrap-datepicker.min.css" />
+    <link rel="stylesheet" href="./css/style.css" />
+  </head>
+  <body>
+    <div class="container">
+      <h2 class="display-4 text-center">EMI Calculator</h2>
+      <div class="main-flex">
+        <div class="main-data-picker">
+          <table class="table table-sm table-borderless" style="margin: auto;">
+            <tbody>
+              <tr>
+                <td>
+                  <label class="active" for="loan_amount">Loan Amount</label>
+                </td>
+                <td>
+                  <div class="input-group">
+                    <input id="loan_amount" min="0" oninput="this.value = !!this.value && Math.abs(this.value) >= 0 ? Math.abs(this.value) : null" type="text" value="10,00,000" class="form-control form-control-sm numeric" />
+                    <div class="input-group-append">
+                      <span class="input-group-text">₹</span>
+                    </div>
+                  </div>
+                </td>
+              </tr>            
+              <tr>
+                <td>
+                  <label class="active" for="interest_rate">Annual Interest Rate</label>
+                </td>
+                <td>
+                  <div class="input-group">
+                  <input id="interest_rate" min="0" oninput="this.value = !!this.value && Math.abs(this.value) >= 0 ? Math.abs(this.value) : null" type="text" value="10" class="form-control form-control-sm numeric" />
+                  <div class="input-group-append">
+                    <span class="input-group-text">%</span>
+                  </div>
+                </div>
+                  </td>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <label class="active" for="loan_period">Loan period in years</label>
+                </td>
+                <td>
+                  <input id="loan_period" min="0" oninput="this.value = !!this.value && Math.abs(this.value) >= 0 ? Math.abs(this.value) : null" type="number" value="5" class="form-control form-control-sm numeric"/>
+                </td>
+                <td>
+                  <div class="tooltip">
+                    <i class='fas fa-question-circle'></i>
+                    <span class="tooltiptext">Tooltip text</span>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <label class="active" for="loan_start_date">EMI Starts from</label>
+                </td>
+                <td>
+                  <div class="input-group date">
+                    <input id="loan_start_date" type="text" class="form-control form-control-sm monthpicker date" />
+                    <div class="input-group-addon">
+                      <span class="glyphicon glyphicon-th"></span>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <label class="active" for="emi_amount">Scheduled monthly payment</label>
+                </td>
+                <td>
+                  <div class="input-group">
+                  <input id="emi_amount" type="text" class="form-control form-control-sm numeric" readonly />
+                  <div class="input-group-append">
+                    <span class="input-group-text">₹</span>
+                  </div>
+                </div>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <label class="active" for="number_of_payments">Total number of payments</label>
+                </td>
+                <td>
+                  <input id="number_of_payments" type="text" class="form-control form-control-sm numeric" readonly />
+                </td>
+              </tr>
+              <tr style="display: none;">
+                <td>
+                  <label class="active" for="actual_number_of_payments">Actual number of payments</label>
+                </td>
+                <td>
+                  <input id="actual_number_of_payments" type="text" class="form-control form-control-sm numeric" readonly/>
+                </td>
+              </tr>
+              <tr style="display: none;">
+                <td>
+                  <label class="active" for="total_early_payments">Total of early payments</label>
+                </td>
+                <td>
+                  <div class="input-group">
+                  <input id="total_early_payments" type="text" class="form-control form-control-sm numeric" readonly/>
+                  <div class="input-group-append">
+                    <span class="input-group-text">₹</span>
+                  </div>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <label class="active" for="total_interest">Total interest</label>
+                </td>
+                <td>
+                  <div class="input-group">
+                  <input id="total_interest" type="text" class="form-control form-control-sm numeric" readonly/>
+                  <div class="input-group-append">
+                    <span class="input-group-text">₹</span>
+                  </div>
+                </div>
+                </td>
+              </tr>
+              <tr style="display: none;">
+                <td>
+                  <label class="active" for="total_interest">Part Payments ? </label>
+                </td>
+                <td>
+                  <div id="part_payment_selector" class="btn-group btn-group-toggle" data-toggle="buttons">
+                    <label class="btn btn-secondary active" for="off"><input type="radio" value="off" id="off" checked name="part_payments" onchange="calculateEmiAmount()"/>No</label>
+                    <label class="btn btn-secondary"><input type="radio"  value="scheduled_plan" id="scheduled_plan" name="part_payments" onchange="calculateEmiAmount()"/>Scheduled Plan</label>
+                    <label class="btn btn-secondary"><input type="radio" value="custom_plan" id="custom_plan" name="part_payments" onchange="calculateEmiAmount()"/>Custom Plan</label>
+                  </div>
+                </td>
+              </tr>
+              <tr class="scheduled_payment_section" style="display: none;">
+                <td>
+                  <label class="active" for="total_interest">Schedule Frequency</label>
+                </td>
+                <td>
+                  <div id="frequency_selector" class="btn-group btn-group-toggle" data-toggle="buttons">
+                    <label class="btn btn-secondary"><input type="radio" value="monthly" id="monthly" name="schedule_frequecy" onchange="calculateEmiAmount()"/>Monthly</label>
+                    <label class="btn btn-secondary active"><input type="radio"  value="quarterly" id="quarterly" checked name="schedule_frequecy" onchange="calculateEmiAmount()"/>Quarterly</label>
+                    <label class="btn btn-secondary"><input type="radio" value="yearly" id="yearly" name="schedule_frequecy" onchange="calculateEmiAmount()"/>Yearly</label>
+                  </div>
+                </td>
+              </tr>
+              <tr class="scheduled_payment_section" style="display: none;">
+                <td>
+                  <label class="active" for="part_payment_installment">Part Payment Per Installment</label>
+                </td>
+                <td>
+                  <div class="input-group">
+                  <input id="part_payment_installment" type="text" class="form-control form-control-sm numeric"/>
+                  <div class="input-group-append">
+                    <span class="input-group-text">₹</span>
+                  </div>
+                </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+           
+        </div>
+        <div class="main-chart">
+          <div id="chart-container">
+            <h2>Payment Breakup</h2>
+            <div id="chart-area"></div>
+          </div>
+        </div>
+      </div>
+      <!-- <div class="jumbotron">
+       <div class="loan-calculation-header">
+        <div id="loan-calculation-text-section">
+          
+        </div>
+        <div id="loan-calculation-chart-section">
+        </div>
+       </div>
+      </div> -->
+      <br/>
+      <button type="button" onclick="toggleTable()">Click To Show/Hide Data Table</button>
+      <button
+      style="border: 2px solid black; font-size:12px; margin-bottom:3px;margin-left: 30px;"
+      type="button"
+      class="btn btn-default"
+      onclick='downloadCSV({filename: "data.csv"});' style="background-color: lightgrey;"
+    >
+     <span style="font-weight: 600;">Export Data</span> 
+    </button>
+    <span style="font-size: 12px; color: red"
+      >*Download the generated table</span
+    >
+      <br />
+      <div id="amort_table" >
+        
+        <table style="display: none;" id="table-view" class="table table-striped table-sm">
+          <thead>
+            <tr>
+              <th class="text-center">No</th>
+              <th class="text-center">EMI Date</th>
+              <th class="text-right">Beginning Balance</th>
+              <th class="text-right hide">Scheduled Payment</th>
+              <th class="text-right" id="part_payment_hdr">Part Payment</th>
+              <th class="text-right">Total Payment</th>
+              <th class="text-right">Principle</th>
+              <th class="text-right">Interest</th>
+              <th class="text-right">Ending Balance</th>
+            </tr>
+          </thead>
+
+          <tbody></tbody>
+        </table>
+      </div>
+      <br />
+    <div class="row mt40">
+      <div class="col-12">
+          <h3>How to use this EMI Calculator?</h3>
+          <div class="gst-feature-list-new">
+              <ul style="padding-top: 10px;">
+                  <li style="padding-bottom: 10px;">Enter Your Loan Amount</li>
+                  <li style="padding-bottom: 10px;">Enter Your Annual Interest Rate</li>
+                  <li style="padding-bottom: 10px;">Enter Your Loan Amount Tenure</li>
+                  <li style="padding-bottom: 10px;">Select Your EMI Start Month-Year</li>
+                  <p style="padding-bottom: 10px;">EMI will be calculated instantaneously when you click outside the box.</p>
+              </ul>
+          </div>
+      </div>
+  </div>
+  <div class="row">
+<div class="col-12">
+    <b style="font-size: 1.65rem;">What is an EMI?</b>
+    <p>EMI or equated monthly instalment is the fixed payment that is made by the borrower to the lender. EMIs
+        pay back both the principal and the interest for each month, and the loan is fully repaid within a
+        specified number of years. Here, the borrower could be you, and the lender could be the bank that has
+        given you the loan. </p>
+    <p>Take, for example, you have borrowed some money from your friend, but you are not able to return the
+        entire amount in a single attempt. You both then decide that you would pay back a part of the amount
+        every month, over a period at a specific interest rate, until you pay him back in full. This is nothing
+        but Equated Monthly Instalment or EMI.</p>
+        </div>
+</div>
+<div class="row">
+  <div class="col-12">
+  <b style="font-size: 1.65rem;">How Does the EMI Calculator Work?</b>
+  <p>An EMI calculator is a handy tool that calculates the monthly amount payable to the lender, according to
+      the following mathematical formula.</p>
+  <p>EMI = [P x R x (1+R)^N]/[(1+R)^N-1];</p>
+  <p>where, P, R, and N are the variables, which means the EMI value will change each time you change any of
+      the three variables.</p>
+  <p>Let’s discuss these three variables in detail.</p>
+  <p>‘P’ denotes the ‘Principal Amount’. This is the original amount lent to you by the bank/lender. The loan
+      amount will depend on your need and the purpose of the loan. The higher the loan amount, the higher will
+      be the EMI that you pay for the loan.</p>
+  <p>R represents the ‘Rate of Interest’. This is the rate at which interest is charged on the principal loan
+      amount. The interest rate will vary according to the type of loan taken and the lender (bank) from which
+      you are taking the loan. The rate of interest has a direct bearing on your EMI amount; hence, it is
+      important to compare interest rates across banks before opting for a loan.</p>
+  <p>N indicates the number of years for which the loan has been taken. This period is known as the tenure.
+      The tenure of a loan refers to the total period given for the repayment of the loan. As the repayment is
+      made every month, the tenure is calculated in months and not years. So, a term of five years is equal to
+      60 months, and so on.</p>
+  <p>Take this example to understand how the EMI calculator works. You have borrowed Rs 10 lakh for five years
+      at an interest rate of 10%. </p>
+  <p>EMI = [P x R x (1+R)^N]/[(1+R)^N-1]</p>
+  <p>P = Rs 10,00,000. R = 10/100/12 (convert to months) and N = 5 years or 60 months.</p>
+  <p>EMI = [10,00,000 * 0.00833 * (1+0.00833)^60]/(1+0.0083)^60 – 1]</p>
+  <p>EMI = Rs 21,247.</p>
+  </div>
+</div>
+  </div>
+
+    <script src="./js/jquery-3.2.1.slim.min.js"></script>
+    <script src="./js/popper.min.js"></script>
+    <script src="./js/bootstrap.min.js"></script>
+    <script src="./js/bootstrap-datepicker.min.js"></script>
+    <script src="./js/apexcharts.min.js"></script>
+    <script src="./js/app.js"></script>
+    <script src='https://kit.fontawesome.com/a076d05399.js' crossorigin='anonymous'></script>
+  </body>
+</html>
